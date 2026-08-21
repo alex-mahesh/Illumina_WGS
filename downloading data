@@ -11,6 +11,9 @@ gdown --folder "https://drive.google.com/drive/folders/1xsAzCeykqf9Tcvd0dP_T2Iq_
 HD1 R2   gdown 1pidZse2guOnmGwvzjDsxHEAtRBrKolZ1
 HD3 R1   gdown 1bp2vev0GTCYkMCj7Is67ZQk-DZsH3qIC
 HD4 R1   gdown 1qAvBenZY2eaK0E19PNZT258jsSqUH9FQ
+HH1 R1   gdown 12tGBUDINFaFRz9PgIQiD84PpKPoFUKf
+HH1 R2   gdown 1Wn7oBpEQ8L0lHelqW74CRskU1wrurGme
+
 #i# nstalling rclone to download files faster
   
 conda create -n rclone -c conda-forge -c bioconda rclone
