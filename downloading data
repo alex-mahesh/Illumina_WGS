@@ -8,7 +8,9 @@ gdown --folder "https://drive.google.com/drive/folders/1xsAzCeykqf9Tcvd0dP_T2Iq_
 
 
    gdown 1J2eeNWTbCosAIFyPEXqWSeNvrLhc2ZASls
-   gdown 1pidZse2guOnmGwvzjDsxHEAtRBrKolZ1
+HD1 R2   gdown 1pidZse2guOnmGwvzjDsxHEAtRBrKolZ1
+HD3 R1   gdown 1bp2vev0GTCYkMCj7Is67ZQk-DZsH3qIC
+HD4 R1   gdown 1qAvBenZY2eaK0E19PNZT258jsSqUH9FQ
 #i# nstalling rclone to download files faster
   
 conda create -n rclone -c conda-forge -c bioconda rclone
@@ -16,3 +18,17 @@ conda create -n rclone -c conda-forge -c bioconda rclone
 gdown --folder --json "https://drive.google.com/drive/folders/1xsAzCeykqf9Tcvd0dP_T2Iq_5xcC66pQ" | \
 python -c 'import sys,json; d=json.load(sys.stdin); [print(x["url"]) for x in d if x["path"].startswith(("HD_","HH_","HF_"))]' | \
 xargs -n 1 gdown --continue
+
+
+
+
+
+aria2c -c -x 8 -s 8 \
+"https://drive.google.com/uc?id=1pidZse2guOnmGwvzjDsxHEAtRBrKolZ1"
+
+
+https://drive.google.com/file/d//view?usp=drive_link
+
+aria2c -c -x 8 -s 8 \
+-o HD_1_S205_L008_R2_001.fastq.gz \
+"https://drive.google.com/uc?id=1pidZse2guOnmGwvzjDsxHEAtRBrKolZ1"
