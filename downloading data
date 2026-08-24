@@ -44,10 +44,28 @@ rclone copy "gdrive,root_folder_id=1xsAzCeykqf9Tcvd0dP_T2Iq_5xcC66pQ:" /home/ale
   --include "HD_11_S207_L008_R2_001.fastq.gz" \
   -P
 
+rclone copy "gdrive,root_folder_id=1xsAzCeykqf9Tcvd0dP_T2Iq_5xcC66pQ:" /home/alex/illumina_WGS/01_rawdata \
+  --include "HD_1_S205_L008_R1_001.fastq.gz" \
+  --include "HD_1_S205_L008_R2_001.fastq.gz" \
+  --include "HD_4_S214_L008_R1_001.fastq.gz" \
+  --include "HD_4_S214_L008_R2_001.fastq.gz" \
+  --include "HD_5_S183_L006_R1_001.fastq.gz" \
+  --include "HD_5_S183_L006_R2_001.fastq.gz" \
+  --include "HD_6_S184_L006_R1_001.fastq.gz" \
+  --include "HD_6_S184_L006_R2_001.fastq.gz" \
+  --include "HD_7_S185_L006_R1_001.fastq.gz" \
+  --include "HD_7_S185_L006_R2_001.fastq.gz" \
+  -P
 
+## to download all samples starting with HH_ ##
+rclone copy "gdrive,root_folder_id=1xsAzCeykqf9Tcvd0dP_T2Iq_5xcC66pQ:" /home/alex/illumina_WGS/01_rawdata \
+  --include "HH_*.fastq.gz" \
+  -P
 
-
-
+## to download all samples starting with HF_ ##
+rclone copy "gdrive,root_folder_id=1xsAzCeykqf9Tcvd0dP_T2Iq_5xcC66pQ:" /home/alex/illumina_WGS/01_rawdata \
+  --include "HF_*.fastq.gz" \
+  -P
 
 
 
