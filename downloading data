@@ -35,3 +35,23 @@ https://drive.google.com/file/d//view?usp=drive_link
 aria2c -c -x 8 -s 8 \
 -o HD_1_S205_L008_R2_001.fastq.gz \
 "https://drive.google.com/uc?id=1pidZse2guOnmGwvzjDsxHEAtRBrKolZ1"
+
+### downloading data using rclone ##
+conda activate rclone
+
+rclone copy "gdrive,root_folder_id=1xsAzCeykqf9Tcvd0dP_T2Iq_5xcC66pQ:" /home/alex/illumina_WGS/01_rawdata \
+  --include "HD_11_S207_L008_R1_001.fastq.gz" \
+  --include "HD_11_S207_L008_R2_001.fastq.gz" \
+  -P
+
+
+
+
+
+
+
+
+
+
+
+
