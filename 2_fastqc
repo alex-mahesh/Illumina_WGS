@@ -1,0 +1,8 @@
+
+## doing fastqc for all samples ##
+
+fastqc *.fastq.gz -o ../2_fastqc -t 8
+// this code basically outputs all fastqc report to a folder named 2_fastqc
+
+
+
