@@ -55,7 +55,10 @@ press (Ctrl + B) together and then D
 ## to attach back to the screen again ##
 tmux attach -t screen_name
 
+### transferring data to NAS drive ###
+ rsync -avh 01_rawdata/ poodl@10.58.98.14:/volume1/datastorage/Alex/
 
+Anubhab@2025
 
 
 
