@@ -12,3 +12,4 @@ conda create -n multiqc -c bioconda multiqc
 ## to do multiqc for all samples ##
 multiqc . -o .
 
+scp alex@10.58.98.103:/home/alex/illumina_WGS/2_fastqc/multiqc_report.html .
