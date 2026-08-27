@@ -4,5 +4,11 @@
 fastqc *.fastq.gz -o ../2_fastqc -t 8
 // this code basically outputs all fastqc report to a folder named 2_fastqc
 
+## doing multiqc for all samples ##
 
+## creating a conda environment for multiqc ##
+conda create -n multiqc -c bioconda multiqc
+
+## to do multiqc for all samples ##
+multiqc . -o .
 
