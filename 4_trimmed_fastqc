@@ -1,0 +1,11 @@
+
+## doing the fastqc of the trimmed reads ##
+
+fastqc *.fq.gz -o ../4_trimmed_fastqc -t 8
+
+// the fastqc files will be stored in a folder named- 4_trimmed_fastqc
+
+
+
+
+
