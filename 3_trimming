@@ -1,1 +1,13 @@
 
+## activating trim-galore ##
+conda activate trim-galore
+
+## carrying out trimming for all files ##
+
+for file in *_R1_*.fastq.gz; do
+    trim_galore --paired \
+        --output_dir /home/alex/illumina_WGS/3_trimmed \
+        "$file" "${file/_R1_/_R2_}"
+done
+
+// here the trimmed files will be stored in another folder named "3_trimmed".
