@@ -1,0 +1,44 @@
+
+## dowloading the refernce genome from NCBI ##
+conda activate aria2
+
+aria2c -x 8 -s 8 https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/031/876/335/GCA_031876335.1_mHipLar1.pri/GCA_031876335.1_mHipLar1.pri_genomic.fna.gz
+
+//-x 8	8 connections per server
+//-s 8	split download into 8 parts; This makes the download much faster
+// there were multiple files in the NCBI website, but I am only downloading the .fna.gz file
+
+### moving the reference geonme for one folder to another ###
+mv /home/alex/ddRAD/analysis/read_mapping/GCA_031876335.1_mHipLar1.pri_genomic.fna* /home/alex/illumina_WGS/5_mapping/
+
+mv /home/alex/ddRAD/analysis/read_mapping/GCA_031876335.1_mHipLar1.pri_genomic.fna /home/alex/illumina_WGS/5_mapping/
+
+### mapping the reads on to the reference genome ###
+## attaching back to a screen ##
+tmux attach -t screen_1
+
+## to exit from a screen (not to close it permennantly) ##
+press (Ctrl + B) together and then D
+
+conda activate bwa
+
+for file1 in ../3_trimmed/*_R1_001_val_1.fq.gz; do
+
+    file2=${file1/_R1_001_val_1.fq.gz/_R2_001_val_2.fq.gz}
+
+    sample_name=$(basename "$file1" _R1_001_val_1.fq.gz)
+
+    echo "Mapping $sample_name..."
+
+    bwa mem \
+        GCA_031876335.1_mHipLar1.pri_genomic.fna \
+        "$file1" \
+        "$file2" \
+        > "${sample_name}_aligned_reads.sam"
+
+done
+
+
+
+
+
