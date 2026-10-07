@@ -38,6 +38,164 @@ for file1 in ../3_trimmed/*_R1_001_val_1.fq.gz; do
 
 done
 
+###### checking mapping statistics ######
+
+## converting sam to bam and sorting ##
+samtools view -@ 8 -b HD_4_S214_L008_aligned_reads.sam | \
+samtools sort -@ 8 -o HD_4_S214_L008_sorted.bam
+
+## indexing the sorted bam ##
+samtools index -@ 8 HD_4_S214_L008_deduplicated.bam
+
+## running the mapping statistics ##
+samtools flagstat -@ 8 HD_4_S214_L008_deduplicated.bam > HD_4_flagstat.txt
+
+then
+cat HD_4_flagstat.txt
+
+## For more detailed statistics: ##
+samtools stats -@ 8 HD_4_S214_L008_sorted.bam > HD_4_stats.txt
+
+And:
+grep "^SN" HD_4_stats.txt
+
+## Checking coverage ##
+
+samtools coverage HD_4_S214_L008_sorted.bam > HD_4_coverage.txt
+
+
+### calculating the overall mean depth and genome-wide breadth of coverage (summarizing the result) ###
+
+samtools depth -a HD_4_S214_L008_sorted.bam | \
+awk '{sum+=$3; if($3>0) covered++; total++} END \
+{print "Mean depth:",sum/total; print "Genome covered:",100*covered/total,"%"}'
+
+## installing gatk4 for marking duplicates ##
+conda create -n gatk4 -c bioconda gatk4
+
+## adding read group to the bam file ##
+gatk AddOrReplaceReadGroups \
+-I HD_4_S214_L008_sorted.bam \
+-O HD_4_S214_L008_RG.bam \
+-ID HD_4_S214_L008 \
+-LB HD_4 \
+-PL ILLUMINA \
+-PU HD_4_S214_L008 \
+-SM HD_4
+
+
+gatk MarkDuplicates \
+-I HD_4_S214_L008_sorted.bam \
+-O HD_4_S214_L008_deduplicated.bam \
+-M HD_4_S214_L008_duplication_metrics.txt \
+--REMOVE_DUPLICATES true
+
+
+## running markduplicates in the 'read group' added bam file 
+gatk MarkDuplicates \
+-I HD_4_S214_L008_RG.bam \
+-O HD_4_S214_L008_deduplicated.bam \
+-M HD_4_S214_L008_duplication_metrics.txt \
+--REMOVE_DUPLICATES true
+
+### estimating coverage using qualimap ##
+conda create -n qualimap -c bioconda qualimap    
+
+## running qualimap for a single sample##
+qualimap bamqc -bam HD_4_S214_L008_deduplicated.bam -outdir qualimap_results -outformat HTML  //this code gave memmory error, so trying with the below code
+
+
+qualimap bamqc \
+-bam HD_4_S214_L008_deduplicated.bam \
+-outdir qualimap_results_HD_4 \
+-outformat HTML \
+--java-mem-size=8G \
+-nt 8
+
+## to download all the contents in the qualimap results folder ##
+scp -r alex@10.58.98.103:/home/alex/illumina_WGS/5_mapping/qualimap_results_HD_4 .
+
+## deleting alll empty sam files ##
+find . -maxdepth 1 -type f -name "*_aligned_reads.sam" -size 0 -delete
+
+
+#############################################################################################3############################################################
+
+## creating sorted bam files for all sam files ##
+
+for file in *.sam; do
+    sample="${file%.sam}"
+
+    gatk AddOrReplaceReadGroups \
+        -I "$file" \
+        -O "${sample}_RG.bam" \
+        -ID "$sample" \
+        -LB "$sample" \
+        -PL ILLUMINA \
+        -PU "$sample" \
+        -SM "$sample"
+
+    samtools sort \
+        -o "${sample}_sorted.bam" \
+        "${sample}_RG.bam"
+
+    rm "${sample}_RG.bam"
+done
+
+
+## marking and removing the duplicates ##
+
+for file in *_sorted.bam; do
+    base=${file%_sorted.bam}
+
+    gatk MarkDuplicates \
+        -I "$file" \
+        -O "${base}_deduplicated.bam" \
+        -M "${base}_duplication_metrics.txt" \
+        --REMOVE_DUPLICATES true
+done
+
+## indexing the depulicated bam ##
+parallel -j 8 'samtools index {}' ::: *_deduplicated.bam
+
+## estimating coverage ##
+
+for file in *_aligned_reads_sorted_deduplicated.bam; do
+    base=${file%_aligned_reads_sorted_deduplicated.bam}
+
+    qualimap bamqc \
+        -bam "$file" \
+        -outdir "qualimap_results_${base}" \
+        -outformat HTML \
+        --java-mem-size=8G \
+        -nt 8
+done
+
+Also check your available RAM first:
+
+free -h
+
+If your server/job allocation has less than 8 GB available, we should reduce --java-mem-size accordingly.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
