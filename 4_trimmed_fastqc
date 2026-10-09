@@ -5,6 +5,63 @@ fastqc *.fq.gz -o ../4_trimmed_fastqc -t 8
 
 // the fastqc files will be stored in a folder named- 4_trimmed_fastqc
 
+### calculating the data obtained per sample after trimming ###
+
+## installing seqkit##
+conda install -c bioconda -c conda-forge seqkit
+
+// we are going to write a script for calculating the data obtained per sample 
+nano trimmed_stats.sh
+// this open up a text editor. We need to paste the below script into it.
+After pasting the code:
+Press Ctrl + O to save the file.
+Press Enter to confirm the filename.
+Press Ctrl + X to exit.
+
+## To run the script ## 
+bash trimmed_stats.sh
+
+#!/bin/bash
+# Create output table
+echo -e "Sample\tTotal_Reads\tTotal_Bases\tGbp" > trimmed_sample_stats.tsv
+
+# Process each R1 file
+for r1 in *_R1_*val_1.fq.gz; do
+
+    # Skip if no matching files exist
+    [ -f "$r1" ] || continue
+
+    # Find the corresponding R2 file
+    r2="${r1/_R1_/_R2_}"
+    r2="${r2/_val_1.fq.gz/_val_2.fq.gz}"
+
+    # Extract sample name
+    sample="${r1%%_S[0-9]*}"
+    sample="${sample%%_L[0-9]*}"
+    sample="${sample}_trimmed"
+
+    # Get statistics for R1 and R2
+    stats=$(seqkit stats -T "$r1" "$r2")
+
+    # Combine read counts and total bases from both files
+    read_count=$(echo "$stats" | awk -F '\t' 'NR>1 {sum += $4} END {print sum}')
+    total_bases=$(echo "$stats" | awk -F '\t' 'NR>1 {sum += $5} END {print sum}')
+
+    # Convert total bases to Gbp
+    gbp=$(awk -v b="$total_bases" 'BEGIN {printf "%.4f", b/1000000000}')
+
+    # Write one row per sample
+    echo -e "${sample}\t${read_count}\t${total_bases}\t${gbp}" >> trimmed_sample_stats.tsv
+
+done
+
+echo "Finished! Results saved in trimmed_sample_stats.tsv"
+
+
+
+
+
+
 
 
 
