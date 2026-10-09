@@ -126,19 +126,19 @@ find . -maxdepth 1 -type f -name "*_aligned_reads.sam" -size 0 -delete
 for file in *.sam; do
     sample="${file%.sam}"
 
-    gatk AddOrReplaceReadGroups \
-        -I "$file" \
-        -O "${sample}_RG.bam" \
-        -ID "$sample" \
-        -LB "$sample" \
-        -PL ILLUMINA \
-        -PU "$sample" \
-        -SM "$sample"
+    samtools addreplacerg \
+        -r "ID:${sample}" \
+        -r "LB:${sample}" \
+        -r "PL:ILLUMINA" \
+        -r "PU:${sample}" \
+        -r "SM:${sample}" \
+        -o "${sample}_RG.bam" "$file"
 
-    samtools sort \
+    samtools sort -@ 4 \
         -o "${sample}_sorted.bam" \
         "${sample}_RG.bam"
 
+    samtools index "${sample}_sorted.bam"
     rm "${sample}_RG.bam"
 done
 
