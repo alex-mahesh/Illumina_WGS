@@ -37,6 +37,13 @@ for file1 in ../3_trimmed/*_R1_001_val_1.fq.gz; do
         > "${sample_name}_aligned_reads.sam"
 
 done
+#### running mapping for a single sample ###
+bwa mem -t 8 \
+    GCA_031876335.1_mHipLar1.pri_genomic.fna \
+    ../3_trimmed/HF_1_S216_L008_R1_001_val_1.fq.gz \
+    ../3_trimmed/HF_1_S216_L008_R2_001_val_2.fq.gz \
+    > HF_1_S216_L008_aligned_reads.sam
+
 
 ###### checking mapping statistics ######
 
