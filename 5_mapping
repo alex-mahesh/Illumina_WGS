@@ -120,26 +120,34 @@ find . -maxdepth 1 -type f -name "*_aligned_reads.sam" -size 0 -delete
 
 
 #############################################################################################3############################################################
+## creating a new screen ##
+tmux new -s screen_2
 
 ## creating sorted bam files for all sam files ##
 
 for file in *.sam; do
     sample="${file%.sam}"
 
+    echo "Processing $sample"
+
+    # Add read groups
     samtools addreplacerg \
         -r "ID:${sample}" \
         -r "LB:${sample}" \
         -r "PL:ILLUMINA" \
         -r "PU:${sample}" \
         -r "SM:${sample}" \
-        -o "${sample}_RG.bam" "$file"
+        -o "${sample}_RG.bam" "$file" || continue
 
+    # Sort BAM by genomic coordinates
     samtools sort -@ 4 \
         -o "${sample}_sorted.bam" \
-        "${sample}_RG.bam"
+        "${sample}_RG.bam" || continue
 
-    samtools index "${sample}_sorted.bam"
+    # Remove intermediate BAM only after successful sorting
     rm "${sample}_RG.bam"
+
+    echo "Completed $sample"
 done
 
 
