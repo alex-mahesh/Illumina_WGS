@@ -158,7 +158,7 @@ for file in *_sorted.bam; do
 
     gatk MarkDuplicates \
         -I "$file" \
-        -O "${base}_deduplicated.bam" \
+        -O "${base}_sorted_deduplicated.bam" \
         -M "${base}_duplication_metrics.txt" \
         --REMOVE_DUPLICATES true
 done
