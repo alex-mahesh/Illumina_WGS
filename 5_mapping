@@ -171,7 +171,12 @@ for file in *_sorted.bam; do
 done
 
 ## indexing the depulicated bam ##
-parallel -j 8 'samtools index {}' ::: *_deduplicated.bam
+
+for bam in *_deduplicated.bam; do
+    [ -f "$bam" ] || continue
+    echo "Indexing $bam ..."
+    samtools index "$bam"
+done
 
 ## estimating coverage ##
 
