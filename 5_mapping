@@ -37,7 +37,42 @@ for file1 in ../3_trimmed/*_R1_001_val_1.fq.gz; do
         > "${sample_name}_aligned_reads.sam"
 
 done
-#### running mapping for a single sample ###
+
+#### doing the mapping only H.hypophyllus samples ####
+cd /home/alex/illumina_WGS/5_mapping         // this is the folder in which we need to be there while running the below code.
+
+for file1 in ../3_trimmed/HH_*_R1_001_val_1.fq.gz; do
+
+    # Find the matching R2 file
+    file2=${file1/_R1_001_val_1.fq.gz/_R2_001_val_2.fq.gz}
+
+    # Check that the matching R2 file exists
+    if [[ ! -f "$file2" ]]; then
+        echo "WARNING: Matching R2 file not found for $file1"
+        continue
+    fi
+
+    # Extract sample name
+    sample_name=$(basename "$file1" _R1_001_val_1.fq.gz)
+
+    echo "Mapping $sample_name..."
+
+    bwa mem -t 8 \
+        GCA_031876335.1_mHipLar1.pri_genomic.fna \
+        "$file1" \
+        "$file2" \
+        > "${sample_name}_aligned_reads.sam"
+
+    if [[ $? -eq 0 ]]; then
+        echo "Finished mapping $sample_name"
+    else
+        echo "ERROR: Mapping failed for $sample_name"
+    fi
+
+done
+
+
+#### running mapping for a single sample ####
 bwa mem -t 8 \
     GCA_031876335.1_mHipLar1.pri_genomic.fna \
     ../3_trimmed/HF_1_S216_L008_R1_001_val_1.fq.gz \
