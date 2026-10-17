@@ -233,7 +233,39 @@ free -h
 If your server/job allocation has less than 8 GB available, we should reduce --java-mem-size accordingly.
 
 
+#################################################################################################################################
 
+### doing the conversion to bam and sorting for HH and HF samples ###
+
+for file in HF_*.sam HH_*.sam; do
+
+    # Skip unmatched patterns if no files exist
+    [ -f "$file" ] || continue
+
+    sample="${file%.sam}"
+
+    echo "Processing $sample"
+
+    # Add read groups and convert SAM to BAM
+    samtools addreplacerg \
+        -r "ID:${sample}" \
+        -r "LB:${sample}" \
+        -r "PL:ILLUMINA" \
+        -r "PU:${sample}" \
+        -r "SM:${sample}" \
+        -o "${sample}_RG.bam" "$file" || continue
+
+    # Sort BAM by genomic coordinates
+    samtools sort -@ 4 \
+        -o "${sample}_sorted.bam" \
+        "${sample}_RG.bam" || continue
+
+    # Remove intermediate BAM after successful sorting
+    rm "${sample}_RG.bam"
+
+    echo "Completed $sample"
+
+done
 
 
 
