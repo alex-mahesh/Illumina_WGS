@@ -267,7 +267,22 @@ for file in HF_*.sam HH_*.sam; do
 
 done
 
+############################# marking and removing the duplicates only for HH and HF samples ####################
 
+for file in HH_*_aligned_reads_sorted.bam HF_*_aligned_reads_sorted.bam; do
+    # Skip if no matching file exists
+    [ -f "$file" ] || continue
+
+    base=${file%_aligned_reads_sorted.bam}
+
+    echo "Processing sample: $base"
+
+    gatk MarkDuplicates \
+        -I "$file" \
+        -O "${base}_sorted_deduplicated.bam" \
+        -M "${base}_duplication_metrics.txt" \
+        --REMOVE_DUPLICATES true
+done
 
 
 
