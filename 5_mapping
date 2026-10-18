@@ -284,7 +284,13 @@ for file in HH_*_aligned_reads_sorted.bam HF_*_aligned_reads_sorted.bam; do
         --REMOVE_DUPLICATES true
 done
 
+################################### indexing the deduplicated bam file (only HH and HF samples) ######################################
 
+for bam in HH_*_sorted_deduplicated.bam HF_*_sorted_deduplicated.bam; do
+    [ -f "$bam" ] || continue
+    echo "Indexing $bam ..."
+    samtools index "$bam"
+done
 
 
 
