@@ -1,0 +1,58 @@
+
+######################### doing variant identification for all the dedulpicated bam files ###################################
+// the below code is being run in this folder: /home/alex/illumina_WGS/6_variant_identification
+
+
+BAM_DIR="/home/alex/illumina_WGS/5_mapping"
+REF="${BAM_DIR}/GCA_031876335.1_mHipLar1.pri_genomic.fna"
+RUN_DIR="/home/alex/illumina_WGS/6_variant_identification/strelka_output"
+
+# Collect all sorted, deduplicated BAM files
+shopt -s nullglob
+bams=("${BAM_DIR}"/*_sorted_deduplicated.bam)
+
+# Check that BAM files were found
+if [ ${#bams[@]} -eq 0 ]; then
+    echo "ERROR: No matching BAM files found in ${BAM_DIR}"
+    exit 1
+fi
+
+# Check the reference genome
+if [ ! -f "$REF" ]; then
+    echo "ERROR: Reference genome not found: $REF"
+    exit 1
+fi
+
+# Check that the reference index exists
+if [ ! -f "${REF}.fai" ]; then
+    echo "ERROR: Reference index missing: ${REF}.fai"
+    exit 1
+fi
+
+# Display the BAM files that will be used
+echo "Number of BAM files: ${#bams[@]}"
+printf '%s\n' "${bams[@]}"
+
+# Do not overwrite an existing Strelka run
+if [ -e "$RUN_DIR" ]; then
+    echo "ERROR: Output directory already exists: $RUN_DIR"
+    echo "Choose a new RUN_DIR or inspect the existing run first."
+    exit 1
+fi
+
+# Configure Strelka germline workflow
+args=()
+
+for bam in "${bams[@]}"; do
+    if [ ! -f "${bam}.bai" ] && [ ! -f "${bam%.bam}.bai" ]; then
+        echo "ERROR: BAM index missing for $bam"
+        exit 1
+    fi
+
+    args+=(--bam "$bam")
+done
+
+configureStrelkaGermlineWorkflow.py \
+    "${args[@]}" \
+    --referenceFasta "$REF" \
+    --runDir "$RUN_DIR"
