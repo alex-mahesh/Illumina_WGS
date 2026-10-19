@@ -293,6 +293,28 @@ for bam in HH_*_sorted_deduplicated.bam HF_*_sorted_deduplicated.bam; do
 done
 
 
+################################### estimating coverage and mapping rate for HH and HF samples ##########################################
+
+for file in HH_*_sorted_deduplicated.bam HF_*_sorted_deduplicated.bam; do
+    [ -f "$file" ] || continue
+
+    base=${file%.bam}
+
+    echo "Running Qualimap for $file ..."
+
+    qualimap bamqc \
+        -bam "$file" \
+        -outdir "qualimap_results_${base}" \
+        -outformat HTML \
+        --java-mem-size=8G \
+        -nt 8
+done
+
+
+
+
+
+
 
 
 
