@@ -56,3 +56,12 @@ configureStrelkaGermlineWorkflow.py \
     "${args[@]}" \
     --referenceFasta "$REF" \
     --runDir "$RUN_DIR"
+
+################ after configuring strelka, run the below code #############################
+
+cd /home/alex/illumina_WGS/6_variant_identification/strelka_output
+
+./runWorkflow.py -m local -j 8
+
+
+
