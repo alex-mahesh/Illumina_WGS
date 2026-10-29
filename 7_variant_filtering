@@ -1,38 +1,7 @@
 
 ################ applying the following filters- MinQ30, MinGQ30, remove indels, remove filtered all.################################
+// I have the following file- variants.vcf.gz file with me. I will be applying the filters on this file.
 
-# Filter 1: Minimum variant quality (QUAL >= 30)
-vcftools \
-    --gzvcf genome.vcf.gz \
-    --minQ 30 \
-    --recode \
-    --stdout | gzip -c > genome_MinQ30.vcf.gz
-
-
-# Filter 2: Minimum genotype quality (GQ >= 30)
-vcftools \
-    --gzvcf genome_MinQ30.vcf.gz \
-    --minGQ 30 \
-    --recode \
-    --stdout | gzip -c > genome_MinQ30_MinGQ30.vcf.gz
-
-
-# Filter 3: Remove indels and retain SNPs only
-vcftools \
-    --gzvcf genome_MinQ30_MinGQ30.vcf.gz \
-    --remove-indels \
-    --recode \
-    --stdout | gzip -c > genome_MinQ30_MinGQ30_SNPs.vcf.gz
-
-
-# Filter 4: Retain only variants marked PASS
-vcftools \
-    --gzvcf genome_MinQ30_MinGQ30_SNPs.vcf.gz \
-    --remove-filtered-all \
-    --recode \
-    --stdout | gzip -c > genome_MinQ30_MinGQ30_SNPs_PASS.vcf.gz
-
-############################################################################################################################
 
 # 1. Retain variants with QUAL >= 30
 bcftools view -i 'QUAL>=30' variants.vcf.gz -Oz -o variants_MinQ30.vcf.gz
@@ -52,8 +21,17 @@ bcftools index variants_MinQ30_MinGQ30_SNPsOnly_PASS.vcf.gz
 echo "All filters applied successfully!"
 
 
+################# counting the number of variants in the above vcf file ###########################
 
+zgrep -vc "^#" variants_MinQ30_MinGQ30_SNPsOnly_PASS.vcf.gz
 
+####################### applying mac3 filter to the "filtered_strelka.vcf" file using vcf tools. #############################
+
+vcftools --gzvcf variants_MinQ30_MinGQ30_SNPsOnly_PASS.vcf.gz \
+--mac 3 \
+--recode \
+--recode-INFO-all \
+--out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3
 
 
 
