@@ -24,6 +24,7 @@ echo "All filters applied successfully!"
 ################# counting the number of variants in the above vcf file ###########################
 
 zgrep -vc "^#" variants_MinQ30_MinGQ30_SNPsOnly_PASS.vcf.gz
+// 126,629,336 - the number of variants in the above vcf file
 
 ####################### applying mac3 filter to the "filtered_strelka.vcf" file using vcf tools. #############################
 
@@ -33,6 +34,18 @@ vcftools --gzvcf variants_MinQ30_MinGQ30_SNPsOnly_PASS.vcf.gz \
 --recode-INFO-all \
 --out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3
 
+// variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3.recode.vcf - this file gets created.
+21,995,998 - the number of variants in the above vcf file
+######################################################################################################################################################################
+### applying the "hwe-0.05" filter
+I am doing this combined for all the species
+
+vcftools \
+--vcf variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3.recode.vcf \
+--hwe 0.05 \
+--recode \
+--out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5
+// filtered_mac3_hwe.recode.vcf - this vcf file will be created
 
 
 
