@@ -45,7 +45,87 @@ vcftools \
 --hwe 0.05 \
 --recode \
 --out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5
+
 // filtered_mac3_hwe.recode.vcf - this vcf file will be created
+// After filtering, kept 8210183 out of a possible 21995998 Sites
+
+################################################################# Apply the individual missingness filter ##################################################
+
+vcftools --vcf  variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5.recode.vcf --missing-indv
+// out.imiss  out.log - these two files get created.
+After filtering, kept 20 out of 20 Individuals
+Outputting Individual Missingness
+After filtering, kept 8210183 out of a possible 8210183 Sites
+
+############################# Removing individuals which have missing proportion greater than 60 percent.##################################
+
+vcftools --vcf variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5.recode.vcf \
+ --remove <(awk '$5 > 0.6 {print $1}' out.imiss) --recode --out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.6
+
+//After filtering, kept 11 out of 20 Individuals
+//After filtering, kept 8210183 out of a possible 8210183 Sites
+
+#### removing samples with more than 70% missiing data #### (just trying)
+vcftools --vcf variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5.recode.vcf \
+ --remove <(awk '$5 > 0.7 {print $1}' out.imiss) --recode --out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.7
+
+//After filtering, kept 12 out of 20 Individuals
+
+#### removing samples with more than 80% missiing data #### (just trying)
+vcftools --vcf variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5.recode.vcf \
+ --remove <(awk '$5 > 0.8 {print $1}' out.imiss) --recode --out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.8
+
+//After filtering, kept 14 out of 20 Individuals
+
+#### removing samples with more than 90% missiing data #### (just trying)
+vcftools --vcf variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5.recode.vcf \
+ --remove <(awk '$5 > 0.9 {print $1}' out.imiss) --recode --out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.9
+
+// After filtering, kept 18 out of 20 Individuals
+
+################## Apply a missingness filter (max-missing) to only keep variants which are common among a proportion of individuals ####################################
+## Do a for loop to apply missingness filter from 0.1 to 0.9 (variants which are found in 10% to 90%)
+
+for miss in {10..90..10}; do
+
+  perc=$(echo "scale=2; $miss / 100" | bc)
+
+  echo "Running max-missing = $perc"
+
+  vcftools --vcf variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.9.recode.vcf \
+           --max-missing $perc \
+           --out variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.9_miss_${miss} \
+           --recode
+
+done
+// we get a recode.vcf file for each of the missing value
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
