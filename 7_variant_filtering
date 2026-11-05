@@ -193,10 +193,24 @@ vcftools --vcf variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.9_miss_
 //After filtering, kept 1087964 out of a possible 1145377 Sites
 // variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.9_miss_60_mid95percentile.recode.vcf -this is the final vcf file that we have obtained after all the filtering.
 
+#### Removing the sex chromosome ###
+First we need to check the assembly report on the NCBI Assembly page to see whether it is:
+chromosome-level, scaffold-level, contig-level and whether X/Y chromosomes were identified.
+The assembly report usually contains entries like: Chromosome X, Chromosome Y or only scaffolds. 
+The reference genome that I have used is a chromsome level assembly and has entries like this: X	CM063105.1. Y chromosome is not annotated in this genome.
 
+## removing the X chromosome from the vcf file ##
 
+bcftools view \
+    --targets ^CM063105.1 \
+    variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.9_miss_60_mid95percentile.recode.vcf \
+    -Oz -o variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.9_miss_60_mid95percentile_autosomes_only.vcf
 
+### counting the number of snips in the vcf file ####
 
+grep -vc "^#" variants_MinQ30_MinGQ30_SNPsOnly_PASS_mac3_hwe0.5_imiss_0.9_miss_60_mid95percentile_autosomes_only.vcf
+
+//1083409- number of snips
 
 
 
