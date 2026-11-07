@@ -1,0 +1,220 @@
+
+## copying the plink files to the admixture folder ##
+
+cp /home/alex/illumina_WGS/7_PCA/pca_data.* /home/alex/illumina_WGS/8_admixture/
+
+The Safe Way to Recode (this was used as the above code gave error)
+Don't use the simple NR % 95 awk trick from before — that can cause collisions. Use this instead, which assigns clean sequential numbers:
+bash# First, get the list of unique chromosome names in order
+
+cut -f1 pca_data.bim | sort -u > chrom_names.txt
+
+# Check how many chromosomes you have
+wc -l chrom_names.txt
+
+// 21 chrom_names.txt- there are 21 chromosomes 
+
+Then recode:
+## Create a chromosome name mapping file ##
+
+awk '{print $0, NR}' chrom_names.txt > chrom_map.txt
+
+# Recode the .bim file using the mapping
+awk 'NR==FNR {map[$1]=$2; next} {$1=map[$1]; print}' \
+    chrom_map.txt pca_data.bim > my_data_admix.bim
+
+# Copy the other files unchanged
+cp pca_data.bed my_data_admix.bed
+cp pca_data.fam my_data_admix.fam
+// my_data_admix.bed my_data_admix.fam -these 2 files get created
+
+## Verify the Recoding Worked ##
+// Should show numbers like 1, 2, 3 ... instead of CM063088.1 etc.
+cut -f1 my_data_admix.bim | sort -u
+
+######################################running admixture with 5 fold cross validation ######################
+
+conda activate admixture
+
+for K in $(seq 1 5); do
+    admixture --cv=5 -j8 my_data_admix.bed $K | tee log_K${K}.txt
+done
+
+################# Step 3: Extract Cross-Validation Errors #################
+## Collect CV errors from all log files ##
+
+grep "CV error" log_K*.txt | awk '{print $3, $4}' | sed 's/(K=//;s/)://' | sort -k1,1n > cv_errors.txt
+
+################ Step 4: Create a Population/Sample Order File #############
+# Generate ordered sample list with species labels #
+awk '{
+    split($1, a, "_");
+    prefix = a[1];
+    if (prefix == "HH") sp = "H.Hypophyllus"
+    else if (prefix == "HD") sp = "H.Durgadasi"
+    else if (prefix == "HS") sp = "H.Speoris"
+    else sp = "Unknown"
+    print $1, sp
+}' my_data_admix.fam > sample_order.txt
+
+#################################### plotting admixture in R ########################################
+
+nano admixtureK2.R
+
+# ==========================================================
+# ADMIXTURE K=2 Plot with Sample Labels and Species Groups
+# ==========================================================
+
+# Install packages if needed
+required_packages <- c("ggplot2", "reshape2", "dplyr")
+
+for(pkg in required_packages){
+  if(!require(pkg, character.only = TRUE)){
+    install.packages(pkg, repos = "https://cloud.r-project.org")
+    library(pkg, character.only = TRUE)
+  }
+}
+
+# ----------------------------------------------------------
+# Read ADMIXTURE Q matrix
+# ----------------------------------------------------------
+
+Q <- read.table("my_data_admix.2.Q")
+
+# ----------------------------------------------------------
+# Read FAM file
+# ----------------------------------------------------------
+
+fam <- read.table("my_data_admix.fam")
+
+# Column 1 = Species/Population ID (HH, HD, HS)
+# Column 2 = Sample ID
+
+species <- fam$V1
+samples <- fam$V2
+
+# Add metadata to Q matrix
+Q$Species <- species
+Q$Sample <- samples
+
+# ----------------------------------------------------------
+# Sort samples by species
+# ----------------------------------------------------------
+
+ord <- order(Q$Species)
+
+Q <- Q[ord, ]
+
+# Store ordered sample names
+sample_order <- Q$Sample
+
+# ----------------------------------------------------------
+# Convert to long format
+# ----------------------------------------------------------
+
+Q_long <- melt(
+  Q,
+  id.vars = c("Species", "Sample"),
+  variable.name = "Cluster",
+  value.name = "Ancestry"
+)
+
+Q_long$Sample <- factor(
+  Q_long$Sample,
+  levels = sample_order
+)
+
+# ----------------------------------------------------------
+# Species boundaries
+# ----------------------------------------------------------
+
+species_counts <- table(Q$Species)
+
+boundaries <- cumsum(species_counts)
+
+# ----------------------------------------------------------
+# Plot
+# ----------------------------------------------------------
+
+p <- ggplot(
+  Q_long,
+  aes(
+    x = Sample,
+    y = Ancestry,
+    fill = Cluster
+  )
+) +
+  geom_bar(
+    stat = "identity",
+    width = 1
+  ) +
+
+  geom_vline(
+    xintercept = boundaries[-length(boundaries)] + 0.5,
+    linetype = "dashed",
+    linewidth = 0.7
+  ) +
+
+  theme_bw() +
+
+  labs(
+    title = "ADMIXTURE Analysis (K = 2)",
+    x = "Samples",
+    y = "Ancestry Proportion"
+  ) +
+
+  theme(
+    axis.text.x = element_text(
+      angle = 90,
+      hjust = 1,
+      vjust = 0.5,
+      size = 6
+    ),
+
+    panel.grid = element_blank(),
+
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold"
+    )
+  )
+
+print(p)
+
+# ----------------------------------------------------------
+# Save figure
+# ----------------------------------------------------------
+
+ggsave(
+  "admixture_K2_labeled.png",
+  plot = p,
+  width = 14,
+  height = 6,
+  dpi = 300
+)
+
+# ----------------------------------------------------------
+# Print species counts
+# ----------------------------------------------------------
+
+cat("\nIndividuals per species:\n")
+print(species_counts)
+
+####################################plotting using excel ################################
+## copying the data to an excel sheet ##
+paste my_data_admix.fam my_data_admix.3.Q > admixture_K3.xls
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
